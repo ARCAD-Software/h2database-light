@@ -6,7 +6,6 @@
 package org.h2.tools;
 
 import java.net.URI;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.h2.api.ErrorCode;
@@ -16,7 +15,6 @@ import org.h2.server.Service;
 import org.h2.server.ShutdownHandler;
 import org.h2.server.TcpServer;
 import org.h2.server.pg.PgServer;
-import org.h2.server.web.WebServer;
 import org.h2.util.StringUtils;
 import org.h2.util.Tool;
 import org.h2.util.Utils;
@@ -27,7 +25,7 @@ import org.h2.util.Utils;
 public class Server extends Tool implements Runnable, ShutdownHandler {
 
     private final Service service;
-    private Server web, tcp, pg;
+    private Server tcp, pg;
     private ShutdownHandler shutdownHandler;
     private boolean fromCommandLine;
     private boolean started;
@@ -247,8 +245,7 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
 
     @Override
     public void runTool(String... args) throws SQLException {
-        boolean tcpStart = false, pgStart = false, webStart = false;
-        boolean browserStart = false;
+        boolean tcpStart = false, pgStart = false;
         boolean tcpShutdown = false, tcpShutdownForce = false;
         String tcpPassword = "";
         String tcpShutdownServer = "";
@@ -262,7 +259,6 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
             } else if (arg.startsWith("-web")) {
                 if ("-web".equals(arg)) {
                     startDefaultServers = false;
-                    webStart = true;
                 } else if ("-webAllowOthers".equals(arg)) {
                     // no parameters
                 } else if ("-webExternalNames".equals(arg)) {
@@ -283,7 +279,6 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
                 }
             } else if ("-browser".equals(arg)) {
                 startDefaultServers = false;
-                browserStart = true;
             } else if (arg.startsWith("-tcp")) {
                 if ("-tcp".equals(arg)) {
                     startDefaultServers = false;
@@ -340,8 +335,6 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
         if (startDefaultServers) {
             tcpStart = true;
             pgStart = true;
-            webStart = true;
-            browserStart = true;
         }
         // TODO server: maybe use one single properties file?
         if (tcpShutdown) {
@@ -360,32 +353,6 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
                 pg = createPgServer(args);
                 pg.start();
                 out.println(pg.getStatus());
-            }
-            if (webStart) {
-                web = createWebServer(args);
-                web.setShutdownHandler(this);
-                SQLException result = null;
-                try {
-                    web.start();
-                } catch (Exception e) {
-                    result = DbException.toSQLException(e);
-                }
-                out.println(web.getStatus());
-                // start browser in any case (even if the server is already
-                // running) because some people don't look at the output, but
-                // are wondering why nothing happens
-                if (browserStart) {
-                    try {
-                        openBrowser(web.getURL());
-                    } catch (Exception e) {
-                        out.println(e.getMessage());
-                    }
-                }
-                if (result != null) {
-                    throw result;
-                }
-            } else if (browserStart) {
-                out.println("The browser can only start if a web server is started (-web)");
             }
         } catch (SQLException e) {
             stopAll();
@@ -446,45 +413,6 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
                 append(service.getURL());
         }
         return buff.toString();
-    }
-
-    /**
-     * Create a new web server, but does not start it yet. Example:
-     *
-     * <pre>
-     * Server server = Server.createWebServer("-trace").start();
-     * </pre>
-     * Supported options are:
-     * -webPort, -webSSL, -webAllowOthers, -webDaemon,
-     * -trace, -ifExists, -ifNotExists, -baseDir, -properties.
-     * See the main method for details.
-     *
-     * @param args the argument list
-     * @return the server
-     * @throws SQLException on failure
-     */
-    public static Server createWebServer(String... args) throws SQLException {
-        return createWebServer(args, null, false);
-    }
-
-    /**
-     * Create a new web server, but does not start it yet.
-     *
-     * @param args
-     *            the argument list
-     * @param key
-     *            key, or null
-     * @param allowSecureCreation
-     *            whether creation of databases using the key should be allowed
-     * @return the server
-     */
-    static Server createWebServer(String[] args, String key, boolean allowSecureCreation) throws SQLException {
-        WebServer service = new WebServer();
-        service.setKey(key);
-        service.setAllowSecureCreation(allowSecureCreation);
-        Server server = new Server(service, args);
-        service.setShutdownHandler(server);
-        return server;
     }
 
     /**
@@ -586,12 +514,7 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
     }
 
     private void stopAll() {
-        Server s = web;
-        if (s != null && s.isRunning(false)) {
-            s.stop();
-            web = null;
-        }
-        s = tcp;
+        Server s = tcp;
         if (s != null && s.isRunning(false)) {
             s.stop();
             tcp = null;
@@ -770,53 +693,4 @@ public class Server extends Tool implements Runnable, ShutdownHandler {
             url + ": " + e.getMessage());
         }
     }
-
-    /**
-     * Start a web server and a browser that uses the given connection. The
-     * current transaction is preserved. This is specially useful to manually
-     * inspect the database when debugging. This method return as soon as the
-     * user has disconnected.
-     *
-     * @param conn the database connection (the database must be open)
-     * @throws SQLException on failure
-     */
-    public static void startWebServer(Connection conn) throws SQLException {
-        startWebServer(conn, false);
-    }
-
-    /**
-     * Start a web server and a browser that uses the given connection. The
-     * current transaction is preserved. This is specially useful to manually
-     * inspect the database when debugging. This method return as soon as the
-     * user has disconnected.
-     *
-     * @param conn the database connection (the database must be open)
-     * @param ignoreProperties if {@code true} properties from
-     *         {@code .h2.server.properties} will be ignored
-     * @throws SQLException on failure
-     */
-    public static void startWebServer(Connection conn, boolean ignoreProperties) throws SQLException {
-        WebServer webServer = new WebServer();
-        String[] args;
-        if (ignoreProperties) {
-            args = new String[] { "-webPort", "0", "-properties", "null"};
-        } else {
-            args = new String[] { "-webPort", "0" };
-        }
-        Server web = new Server(webServer, args);
-        web.start();
-        Server server = new Server();
-        server.web = web;
-        webServer.setShutdownHandler(server);
-        String url = webServer.addSession(conn);
-        try {
-            Server.openBrowser(url);
-            while (!webServer.isStopped()) {
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
 }

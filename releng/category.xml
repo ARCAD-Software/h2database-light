@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="com.h2database.light"/>
+   <bundle id="org.locationtech.jts.jts-core"/>
+</site>

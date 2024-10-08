@@ -2,13 +2,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.h2database</groupId>
-  <artifactId>h2</artifactId>
-  <version>2.3.232</version>
-  <packaging>jar</packaging>
-  <name>H2 Database Engine</name>
-  <url>https://h2database.com</url>
-  <description>H2 Database Engine</description>
+	<parent>
+		<groupId>com.h2database.light</groupId>
+		<artifactId>com.h2database.light.parent</artifactId>
+		<version>2.0.0</version>
+	</parent>
+
+  <artifactId>com.h2database.light</artifactId>
+  <version>2.3.232.1</version>
+  <packaging>eclipse-plugin</packaging>
 
   <licenses>
     <license>

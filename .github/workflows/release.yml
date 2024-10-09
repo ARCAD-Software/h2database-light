@@ -47,4 +47,4 @@ jobs:
       with:
         name: "Release ${{ github.ref_name }}"
         files: |
-          releng/update/target/flat-repository/*
+          releng/target/flat-repository/*

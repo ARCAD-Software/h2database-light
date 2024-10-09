@@ -94,7 +94,6 @@
 					</sourceReferences>
 				</configuration>
 			</plugin>
-		<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
@@ -114,7 +113,6 @@
 					</execution>
 				</executions>
 			</plugin>
-		-->
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-plugin</artifactId>

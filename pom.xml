@@ -18,23 +18,12 @@
 		<keystore></keystore>
 		<tycho.scmUrl>scm:git:https://github.com/ARCAD-Software/h2database-light.git</tycho.scmUrl>
 	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm-bom -->
-			<dependency>
-			    <groupId>org.ow2.asm</groupId>
-			    <artifactId>asm-bom</artifactId>
-			    <version>9.5</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.7</version>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<version>1.12.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

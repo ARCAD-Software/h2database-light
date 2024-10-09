@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.7</version>
+			<version>2.0.16</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>org.locationtech.jts</groupId>
 			<artifactId>jts-core</artifactId>
-			<version>1.19.0</version>
+			<version>1.20.0</version>
 		</dependency>
 	</dependencies>
 

@@ -13,8 +13,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<tycho.version>3.0.5</tycho.version>
-		<tycho.extra.version>3.0.5</tycho.extra.version>
+		<tycho.version>4.0.13</tycho.version>
+		<tycho.extra.version>4.0.13</tycho.extra.version>
 		<keystore></keystore>
 		<tycho.scmUrl>scm:git:https://github.com/ARCAD-Software/h2database-light.git</tycho.scmUrl>
 	</properties>
@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
-			<version>1.12.10</version>
+			<version>1.12.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

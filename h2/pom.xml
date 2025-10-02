@@ -4,7 +4,7 @@
 
   <groupId>com.h2database</groupId>
   <artifactId>h2</artifactId>
-  <version>1.4.201-SNAPSHOT</version>
+  <version>1.4.200.1</version>
   <packaging>jar</packaging>
   <name>H2 Database Engine</name>
   <url>https://h2database.com</url>
@@ -24,8 +24,8 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:https://github.com/h2database/h2database</connection>
-    <url>https://github.com/h2database/h2database</url>
+    <connection>scm:git:https://github.com/ARCAD-Software/h2database-light</connection>
+    <url>https://github.com/ARCAD-Software/h2database-light</url>
   </scm>
 
   <developers>
@@ -53,21 +53,6 @@
       <version>3.1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>5.5.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <version>5.5.5</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queryparser</artifactId>
-        <version>5.5.5</version>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
@@ -85,84 +70,9 @@
     <dependency>
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
-      <version>1.15.0</version>
+      <version>1.19.0</version>
     </dependency>
-    <!-- END COMPILE DEPENDENCIES !-->
-
-
-    <!-- START TEST DEPENDENCIES !-->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-nop</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.2.5.jre7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>7.0</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- END TEST DEPENDENCIES !-->
   </dependencies>
-
-  <!-- The test code creates proxy files using javac or tools.jar. Through maven we need to tell it
-       where to possibly find tools.jar and annoyingly its called classes.jar on OSX -->
-  <profiles>
-    <profile>
-      <id>jigsaw-jdk</id>
-      <activation>
-        <jdk>[1.9,)</jdk>
-      </activation>
-      <dependencies/>
-    </profile>
-    <profile>
-      <id>default-tools.jar</id>
-      <activation>
-        <file>
-          <exists>${java.home}/../lib/tools.jar</exists>
-        </file>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.sun</groupId>
-          <artifactId>tools</artifactId>
-          <scope>system</scope>
-          <version>1.7</version>
-          <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>default-tools.jar-mac</id>
-      <activation>
-        <file>
-          <exists>${java.home}/../Classes/classes.jar</exists>
-        </file>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.sun</groupId>
-          <artifactId>tools</artifactId>
-          <scope>system</scope>
-          <version>1.7</version>
-          <systemPath>${java.home}/../Classes/classes.jar</systemPath>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 
   <build>
     <sourceDirectory>src/main</sourceDirectory>
@@ -185,30 +95,7 @@
           <include>META-INF/**</include>
         </includes>
       </resource>
-      <resource>
-        <directory>src/java8/precompiled</directory>
-      </resource>
-      <resource>
-        <directory>src/java9/precompiled</directory>
-        <targetPath>META-INF/versions/9</targetPath>
-      </resource>
-      <resource>
-        <directory>src/java10/precompiled</directory>
-        <targetPath>META-INF/versions/10</targetPath>
-      </resource>
     </resources>
-    <testResources>
-  <testResource>
-    <directory>src/test</directory>
-      <includes>
-        <include>org/h2/test/bench/test.properties</include>
-        <include>org/h2/test/script/testScrip.sql</include>
-        <include>org/h2/test/scripts/**/*.sql</include>
-        <include>org/h2/samples/newsfeed.sql</include>
-        <include>org/h2/samples/optimizations.sql</include>
-      </includes>
-    </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -228,81 +115,6 @@
           </archive>
         </configuration>
       </plugin>
-      <!-- Add tools folder to test sources but consider moving them to src/test -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>src/tools</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Make sure neither we nor one of our dependencies uses anything outside JDK 1.7 -->
-<!-- commented out for now because it fails to build under JDK1.8+ because we are manually adding the tools jar
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M1</version>
-        <executions>
-          <execution>
-            <id>check-java-version</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <enforceBytecodeVersion>
-                  <maxJdkVersion>1.7</maxJdkVersion>
-                </enforceBytecodeVersion>
-                <checkSignatureRule implementation="org.codehaus.mojo.animal_sniffer.enforcer.CheckSignatureRule">
-                  <signature>
-                    <groupId>org.codehaus.mojo.signature</groupId>
-                    <artifactId>java17</artifactId>
-                    <version>1.0</version>
-                  </signature>
-                </checkSignatureRule>
-              </rules>
-              <fail>true</fail>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>extra-enforcer-rules</artifactId>
-            <version>1.0-beta-6</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>animal-sniffer-enforcer-rule</artifactId>
-            <version>1.16</version>
-          </dependency>
-        </dependencies>
-      </plugin>
--->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
-        <configuration>
-          <includes>
-            <include>TestAllJunit.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
-
-
 </project>

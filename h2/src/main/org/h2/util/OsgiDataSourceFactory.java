@@ -7,6 +7,7 @@ package org.h2.util;
 
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Dictionary;
 import java.util.Properties;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -286,7 +287,8 @@ public class OsgiDataSourceFactory implements DataSourceFactory {
      * @param bundleContext the bundle context
      * @param driver the driver
      */
-    static void registerService(BundleContext bundleContext,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	static void registerService(BundleContext bundleContext,
             org.h2.Driver driver) {
         Properties properties = new Properties();
         properties.put(
@@ -300,6 +302,6 @@ public class OsgiDataSourceFactory implements DataSourceFactory {
                 Constants.FULL_VERSION);
         bundleContext.registerService(
                 DataSourceFactory.class.getName(),
-                new OsgiDataSourceFactory(driver), properties);
+                new OsgiDataSourceFactory(driver), (Dictionary) properties);
     }
 }

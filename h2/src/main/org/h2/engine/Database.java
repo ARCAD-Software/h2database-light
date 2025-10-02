@@ -72,11 +72,9 @@ import org.h2.table.TableSynonym;
 import org.h2.table.TableType;
 import org.h2.table.TableView;
 import org.h2.tools.DeleteDbFiles;
-import org.h2.tools.Server;
 import org.h2.util.CurrentTimestamp;
 import org.h2.util.JdbcUtils;
 import org.h2.util.MathUtils;
-import org.h2.util.NetUtils;
 import org.h2.util.NetworkConnectionInfo;
 import org.h2.util.SmallLRUCache;
 import org.h2.util.SourceCompiler;
@@ -201,8 +199,6 @@ public class Database implements DataHandler, CastDataProvider {
             Constants.DEFAULT_MAX_OPERATION_MEMORY;
     private SmallLRUCache<String, String[]> lobFileListCache;
     private final boolean autoServerMode;
-    private final int autoServerPort;
-    private Server server;
     private HashMap<TableLinkConnection, TableLinkConnection> linkConnections;
     private final TempFileDeleter tempFileDeleter = TempFileDeleter.getInstance();
     private PageStore pageStore;
@@ -251,7 +247,6 @@ public class Database implements DataHandler, CastDataProvider {
         this.accessModeData = StringUtils.toLowerEnglish(
                 ci.getProperty("ACCESS_MODE_DATA", "rw"));
         this.autoServerMode = ci.getProperty("AUTO_SERVER", false);
-        this.autoServerPort = ci.getProperty("AUTO_SERVER_PORT", 0);
         int defaultCacheSize = Utils.scaleForAvailableMemory(
                 Constants.CACHE_SIZE_DEFAULT);
         this.cacheSize =
@@ -870,33 +865,9 @@ public class Database implements DataHandler, CastDataProvider {
     }
 
     private void startServer(String key) {
-        try {
-            server = Server.createTcpServer(
-                    "-tcpPort", Integer.toString(autoServerPort),
-                    "-tcpAllowOthers",
-                    "-tcpDaemon",
-                    "-key", key, databaseName);
-            server.start();
-        } catch (SQLException e) {
-            throw DbException.convert(e);
-        }
-        String localAddress = NetUtils.getLocalAddress();
-        String address = localAddress + ":" + server.getPort();
-        lock.setProperty("server", address);
-        String hostName = NetUtils.getHostName(localAddress);
-        lock.setProperty("hostName", hostName);
-        lock.save();
     }
 
     private void stopServer() {
-        if (server != null) {
-            Server s = server;
-            // avoid calling stop recursively
-            // because stopping the server will
-            // try to close the database as well
-            server = null;
-            s.stop();
-        }
     }
 
     private void recompileInvalidViews(Session session) {

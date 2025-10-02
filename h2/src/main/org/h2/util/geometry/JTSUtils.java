@@ -41,7 +41,6 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 
 /**
@@ -114,7 +113,7 @@ public final class JTSUtils {
         protected void init(int srid) {
             factory = new GeometryFactory(new PrecisionModel(), srid,
                     (dimensionSystem & DIMENSION_SYSTEM_XYM) != 0 ? PackedCoordinateSequenceFactory.DOUBLE_FACTORY
-                            : CoordinateArraySequenceFactory.instance());
+                            : PackedCoordinateSequenceFactory.FLOAT_FACTORY);
         }
 
         @Override

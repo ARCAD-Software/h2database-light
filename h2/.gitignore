@@ -1,7 +1,4 @@
 .checkstyle
-.classpath
-.project
-.settings
 benchmark.html
 bin
 coverage
